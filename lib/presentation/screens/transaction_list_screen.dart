@@ -4,6 +4,7 @@ import 'package:budgeting_flutter_app_v1/presentation/provider/transaction_provi
 import 'package:intl/intl.dart';
 import 'package:budgeting_flutter_app_v1/presentation/screens/transaction_edit_screen.dart';
 import 'package:budgeting_flutter_app_v1/presentation/screens/transaction_form_screen.dart';
+import 'package:budgeting_flutter_app_v1/presentation/helper.dart';
 
 class TransactionListScreen extends StatelessWidget {
   @override
@@ -21,12 +22,11 @@ class TransactionListScreen extends StatelessWidget {
                     child: Consumer<TransactionProvider>(
                       builder: (context, transactionProvider, _) {
                         final double income = transactionProvider.userIncome;
-
                         return _buildInfoCard(Icons.arrow_upward, 'Pemasukan', income);
                       },
                     ),
                   ),
-
+                  // SizedBox(width: 12,),
                   Expanded(
                     child: Consumer<TransactionProvider>(
                       builder: (context, transactionProvider, _) {
@@ -35,21 +35,19 @@ class TransactionListScreen extends StatelessWidget {
                       },
                     ),
                   ),
-
+                  // SizedBox(width: 12,),
                   Expanded(
-                    child: Consumer<TransactionProvider>(
-                        builder: (context, transactionProvider, _) {
-                          final double balance = transactionProvider.userBalance;
-                          return _buildInfoCard(Icons.account_balance_wallet, 'Saldo', balance);
-                        }
-                    )
-
+                      child: Consumer<TransactionProvider>(
+                          builder: (context, transactionProvider, _) {
+                            final double balance = transactionProvider.userBalance;
+                            return _buildInfoCard(Icons.account_balance_wallet, 'Saldo', balance);
+                          }
+                      )
                   ),
                 ],
               ),
             ),
             Text('List Transactions'),
-
             Padding(
               padding: const EdgeInsets.all(16),
               child: Consumer<TransactionProvider>(
@@ -60,6 +58,7 @@ class TransactionListScreen extends StatelessWidget {
                     final transactions = transactionProvider.transactions;
                     return Column(
                       children: transactions.map((transaction) {
+                        String categoryName = categoryMap[transaction.transactionCategoryID] ?? 'Unknown';
                         return Column(
                           children: [
                             Dismissible(
@@ -120,7 +119,7 @@ class TransactionListScreen extends StatelessWidget {
                                   child: Icon(Icons.category, color: Colors.white),
                                 ),
                                 title: Text(
-                                  'Category: ${transaction.transactionCategoryID}',
+                                  '$categoryName',
                                   style: TextStyle(fontWeight: FontWeight.bold),
                                 ),
                                 subtitle: Text(
@@ -161,7 +160,8 @@ class TransactionListScreen extends StatelessWidget {
             MaterialPageRoute(builder: (context) => TransactionFormScreen()),
           );
         },
-        child: Icon(Icons.add),
+        backgroundColor: Colors.deepPurpleAccent,
+        child: Icon(Icons.add, color: Colors.white,),
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
@@ -173,38 +173,41 @@ class TransactionListScreen extends StatelessWidget {
 
     return Card(
       color: Colors.deepPurpleAccent,
-      elevation: 4,
+      elevation: 5,
+
       child: Padding(
         padding: const EdgeInsets.all(12.0),
-        child: Column(
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: Colors.white,
+        child: Container(
+          child: Column(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                ),
+                child: Icon(icon, color: Colors.deepPurpleAccent),
               ),
-              child: Icon(icon, color: Colors.deepPurpleAccent),
-            ),
-            SizedBox(height: 8),
-            Text(
-              title,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                color: Colors.white,
+              SizedBox(height: 8),
+              Text(
+                title,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 15,
+                  color: Colors.white,
+                ),
               ),
-            ),
-            SizedBox(height: 4),
-            Text(
-              formattedValue,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.white,
+              SizedBox(height: 4),
+              Text(
+                formattedValue,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.white,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

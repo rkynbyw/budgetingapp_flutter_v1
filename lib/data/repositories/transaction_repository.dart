@@ -43,4 +43,15 @@ class TransactionRepository {
       throw Exception('Failed to delete transaction: $e');
     }
   }
+
+  Future<double> getExpenseForMonth(
+      int year, int month, int transactionCategoryId) async {
+    try {
+      return await _dataSource.getExpenseForMonth(
+          year, month, transactionCategoryId);
+    } catch (e) {
+      throw Exception('Failed to get expense for month: $e');
+    }
+  }
 }
+

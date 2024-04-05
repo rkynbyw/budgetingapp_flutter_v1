@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:budgeting_flutter_app_v1/data/models/budget_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'master.dart';
 
 class BudgetDataSource {
-  final String baseUrl = 'https://localhost:7018';
+
 
   Future<Map<String, String>> _getHeaders() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -25,7 +26,7 @@ class BudgetDataSource {
   Future<List<BudgetModel>> getUserBudget() async {
     int? userId = await _getUserId();
     final response = await http.get(
-        Uri.parse('$baseUrl/api/Budgets/user/$userId'),
+        Uri.parse('${Master.baseUrl}/api/Budgets/user/$userId'),
         headers: await _getHeaders());
     if (response.statusCode == 200) {
 
@@ -41,7 +42,7 @@ class BudgetDataSource {
 
   Future<BudgetModel> getBudgetById(int id) async {
     final response = await http.get(
-        Uri.parse('$baseUrl/api/Budgets/$id'),
+        Uri.parse('${Master.baseUrl}/api/Budgets/$id'),
         headers: await _getHeaders());
     if (response.statusCode == 200) {
       final jsonData = json.decode(response.body);
@@ -53,7 +54,7 @@ class BudgetDataSource {
 
   Future<void> createBudget(BudgetModel budget) async {
     final response = await http.post(
-      Uri.parse('$baseUrl/api/Budgets'),
+      Uri.parse('${Master.baseUrl}/api/Budgets'),
       headers: await _getHeaders(),
       body: jsonEncode(budget.toJson()),
     );
@@ -64,7 +65,7 @@ class BudgetDataSource {
 
   Future<void> updateBudget(int id, BudgetModel budget) async {
     final response = await http.put(
-      Uri.parse('$baseUrl/api/Budgets/$id'),
+      Uri.parse('${Master.baseUrl}/api/Budgets/$id'),
       headers: await _getHeaders(),
       body: jsonEncode(budget.toJson()),
     );
@@ -74,7 +75,7 @@ class BudgetDataSource {
   }
 
   Future<void> deleteBudget(int id) async {
-    final response = await http.delete(Uri.parse('$baseUrl/api/Budgets/$id'), headers: await _getHeaders());
+    final response = await http.delete(Uri.parse('${Master.baseUrl}/api/Budgets/$id'), headers: await _getHeaders());
     if (response.statusCode != 200) {
       throw Exception('Failed to delete budget');
     }

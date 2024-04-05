@@ -1,4 +1,5 @@
 import 'package:budgeting_flutter_app_v1/presentation/provider/wallet_provider.dart';
+import 'package:budgeting_flutter_app_v1/presentation/screens/user_register.screens.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:provider/provider.dart';
@@ -68,18 +69,25 @@ class LoginPage extends StatelessWidget {
                     ),
                     Container(
                       width: 250,
-                      child: TextField(
+                      child: TextFormField(
                         controller: _usernameController,
                         decoration: InputDecoration(
                           labelText: 'Username',
                           suffixIcon: Icon(FontAwesomeIcons.user,
-                              size: 17), // Atur ukuran ikon di sini
+                              size: 17),
                         ),
+                        validator: (value) {
+                          if (value == null || value == 0) {
+                            return 'Please enter username';
+                          }
+                          return null;
+                        },
+
                       ),
                     ),
                     Container(
                         width: 250,
-                        child: TextField(
+                        child: TextFormField(
                             controller: _passwordController,
                             obscureText: true,
                             decoration: InputDecoration(
@@ -88,7 +96,15 @@ class LoginPage extends StatelessWidget {
                                     Icon(FontAwesomeIcons.eyeSlash, size: 17)
                                 // suffixIcon: ,
                                 // size: 17
-                                ))),
+                                ),
+                          validator: (value) {
+                            if (value == null || value == 0) {
+                              return 'Please enter username';
+                            }
+                            return null;
+                          },
+                        )
+                    ),
                     Padding(
                       padding: EdgeInsets.fromLTRB(20, 20, 40, 20),
                       child: Row(
@@ -99,90 +115,153 @@ class LoginPage extends StatelessWidget {
                         ],
                       ),
                     ),
-                    SizedBox(height: 20),
+                    SizedBox(height: 10),
                     Consumer<AuthProvider>(
                       builder: (context, authProvider, _) =>
                           authProvider.isLoading
                               ? CircularProgressIndicator()
-                              : ElevatedButton(
-                                  onPressed: () async {
-                                    final authProvider =
-                                        Provider.of<AuthProvider>(context,
-                                            listen: false);
-                                    final user = await authProvider.login(
-                                      _usernameController.text,
-                                      _passwordController.text,
-                                    );
-                                    // After successful login, navigate to home screen
-                                    Provider.of<TransactionProvider>(context,
-                                            listen: false)
-                                        .fetchTransactions();
-                                    Provider.of<BudgetProvider>(context,
-                                            listen: false)
-                                        .fetchBudgets();
-                                    Provider.of<WalletProvider>(context,
-                                        listen: false)
-                                        .fetchWallets();
-                                    Navigator.pushReplacement(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) => HomeScreen(),
+                              : Column(
+                                children: [
+                                  ElevatedButton(
+                                      onPressed: () async{
+                                        try {
+                                          final authProvider =
+                                          Provider.of<AuthProvider>(context, listen: false);
+                                          final user = await authProvider.login(
+                                            _usernameController.text,
+                                            _passwordController.text,
+                                          );
+
+                                          Provider.of<TransactionProvider>(context, listen: false).fetchTransactions();
+                                          Provider.of<BudgetProvider>(context, listen: false).fetchBudgets();
+                                          Provider.of<WalletProvider>(context, listen: false).fetchWallets();
+
+                                          Navigator.pushReplacement(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => HomeScreen(),
+                                            ),
+                                          );
+                                        } catch (e) {
+
+                                          showDialog(
+                                            context: context,
+                                            builder: (BuildContext context) {
+                                              return AlertDialog(
+                                                title: Text('Error'),
+                                                content: Text(e.toString()),
+                                                actions: <Widget>[
+                                                  TextButton(
+                                                    onPressed: () => Navigator.of(context).pop(),
+                                                    child: Text('OK'),
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                          );
+                                        }
+                                      },
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.all<Color>(Colors
+                                                .transparent),
+                                        padding: MaterialStateProperty
+                                            .all<EdgeInsetsGeometry>(EdgeInsets
+                                                .zero), // Atur padding menjadi nol
+                                        tapTargetSize: MaterialTapTargetSize
+                                            .shrinkWrap,
                                       ),
-                                    );
-                                  },
-                                  style: ButtonStyle(
-                                    backgroundColor:
-                                        MaterialStateProperty.all<Color>(Colors
-                                            .transparent), // Atur warna latar belakang transparan
-                                    padding: MaterialStateProperty
-                                        .all<EdgeInsetsGeometry>(EdgeInsets
-                                            .zero), // Atur padding menjadi nol
-                                    tapTargetSize: MaterialTapTargetSize
-                                        .shrinkWrap, // Atur ukuran target tap agar sesuai dengan konten tombol
-                                  ),
-                                  child: Ink(
-                                    decoration: BoxDecoration(
-                                      gradient: LinearGradient(
-                                        begin: Alignment.centerLeft,
-                                        end: Alignment.centerRight,
-                                        colors: [
-                                          Color(0xFF6D55BD),
-                                          Color(0xFFB700FF),
-                                        ],
+                                      child: Ink(
+                                        decoration: BoxDecoration(
+                                          gradient: LinearGradient(
+                                            begin: Alignment.centerLeft,
+                                            end: Alignment.centerRight,
+                                            colors: [
+                                              Color(0xFF6D55BD),
+                                              Color(0xFFB700FF),
+                                            ],
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                              50),
+                                        ),
+                                        child: Container(
+                                          alignment: Alignment.center,
+                                          width: 250,
+                                          padding: EdgeInsets.all(12.0),
+                                          child: Text('Login',
+                                              style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 16,
+                                                  fontWeight: FontWeight.bold)),
+                                        ),
                                       ),
-                                      borderRadius: BorderRadius.circular(
-                                          50), // Atur sudut tombol
                                     ),
-                                    child: Container(
-                                      alignment: Alignment.center,
-                                      width: 250,
-                                      padding: EdgeInsets.all(12.0),
-                                      child: Text('Login',
-                                          style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 16,
-                                              fontWeight: FontWeight.bold)),
-                                    ),
-                                  ),
-                                ),
+                                  // if (authProvider.errorMessage.isNotEmpty)
+                                  //   Padding(
+                                  //     padding: const EdgeInsets.symmetric(vertical: 8.0),
+                                  //     child: Text(
+                                  //       authProvider.errorMessage,
+                                  //       style: TextStyle(
+                                  //         color: Colors.red,
+                                  //         fontSize: 14.0,
+                                  //       ),
+                                  //     ),
+                                  //   ),
+                                ],
+                              ),
+
                     ),
                     SizedBox(
-                      height: 30,
+                      height: 8,
                     ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Dont have account?',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w500,
+                            color: Colors.grey[600],
+                          ),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(builder: (context) => RegisterPage()),
+                            );
+                          },
+                          child: Text(
+                            'Register',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w500,
+                              color: Colors.purpleAccent,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                    SizedBox(
+                      height: 15,
+                    ),
+
                     Text('Or login using Social Media',
                         style: TextStyle(
                             fontWeight: FontWeight.w500,
                             color: Colors.grey[600])),
                     SizedBox(
-                      height: 20,
+                      height: 15,
                     ),
                     Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                      mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Icon(FontAwesomeIcons.facebook,
+                          Icon(FontAwesomeIcons.facebook,
                             color: Colors.purpleAccent),
+                        SizedBox(width: 20,),
                         Icon(FontAwesomeIcons.google,
                             color: Colors.purpleAccent),
+                        SizedBox(width: 20,),
                         Icon(FontAwesomeIcons.apple,
                             color: Colors.purpleAccent),
                       ],
@@ -195,85 +274,3 @@ class LoginPage extends StatelessWidget {
     ));
   }
 }
-
-// class LoginPage extends StatefulWidget {
-//   const LoginPage({super.key});
-//
-//   @override
-//   State<LoginPage> createState() => _LoginPageState();
-// }
-//
-// class _LoginPageState extends State<LoginPage>
-//     with SingleTickerProviderStateMixin {
-//   late AnimationController _controller;
-//
-//   @override
-//   void initState() {
-//     super.initState();
-//     _controller = AnimationController(vsync: this);
-//   }
-//
-//   @override
-//   void dispose() {
-//     _controller.dispose();
-//     super.dispose();
-//   }
-//
-//   final LoginRepository _loginRepository = LoginRepository();
-//
-//   bool _isLoading = false;
-//
-//   Future<void> _login() async {
-//     setState(() {
-//       _isLoading = true;
-//     });
-//
-//     try {
-//       final UserAuthModel user = await _loginRepository.login(
-//         _usernameController.text,
-//         _passwordController.text,
-//       );
-//
-//       // Simpan token ke SharedPreferences
-//       SharedPreferences prefs = await SharedPreferences.getInstance();
-//       await prefs.setString('token', user.token);
-//       await prefs.setInt('userId', user.userId);
-//       await prefs.setString('username', user.username);
-//       await prefs.setString('role', user.role);
-//
-//       // Cetak informasi user
-//       print('UserId: ${user.userId}');
-//       print('Username: ${prefs.getString('username')}');
-//       print('Role: ${user.role}');
-//       print('Token: ${prefs.getString('token')}');
-//
-//       // Navigasi ke halaman beranda setelah login berhasil
-//       Provider.of<TransactionProvider>(context, listen: false)
-//           .fetchTransactions();
-//       Provider.of<BudgetProvider>(context, listen: false).fetchBudgets();
-//       Navigator.pushReplacement(
-//           context, MaterialPageRoute(builder: (context) => HomeScreen()));
-//     } catch (e) {
-//       print('Error: $e');
-//       showDialog(
-//         context: context,
-//         builder: (BuildContext context) {
-//           return AlertDialog(
-//             title: Text('Error'),
-//             content: Text('Failed to login. Please try again.'),
-//             actions: <Widget>[
-//               TextButton(
-//                 onPressed: () => Navigator.of(context).pop(),
-//                 child: Text('OK'),
-//               ),
-//             ],
-//           );
-//         },
-//       );
-//     } finally {
-//       setState(() {
-//         _isLoading = false;
-//       });
-//     }
-//   }
-// }

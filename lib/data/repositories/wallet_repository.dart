@@ -15,13 +15,13 @@ class WalletRepository{
   Future<double> getUserBalance() async {
     try {
       final walletList = await _datasource.getUserWallet();
-      print(walletList);
+      // print(walletList);
       double totalBalance = 0;
       for (var wallet in walletList) {
         totalBalance += wallet.balance;
-        print (wallet.balance);
+        // print (wallet.balance);
       }
-      print(totalBalance);
+      // print(totalBalance);
       return totalBalance;
     } catch (e) {
       throw Exception('Failed to get user balance: repository $e');

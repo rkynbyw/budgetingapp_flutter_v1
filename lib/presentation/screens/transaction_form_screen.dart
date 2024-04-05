@@ -5,6 +5,9 @@ import 'package:budgeting_flutter_app_v1/presentation/provider/transaction_provi
 import 'package:budgeting_flutter_app_v1/data/models/transaction_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../helper.dart';
+import '../provider/wallet_provider.dart';
+
 class TransactionFormScreen extends StatelessWidget {
   const TransactionFormScreen({Key? key}) : super(key: key);
 
@@ -35,7 +38,7 @@ class _TransactionFormState extends State<TransactionForm> {
   int _transactionCategory = 1; // Default transaction category
   DateTime _selectedDate = DateTime.now();
   String _description = 'Description';
-  int _walletId = 59; // Default wallet ID
+  int _walletId = 0; // Default wallet ID
   int _userId = 15; // Default user ID
 
   @override
@@ -61,7 +64,7 @@ class _TransactionFormState extends State<TransactionForm> {
     }
   }
 
-  // Fungsi untuk menampilkan date picker
+
   void _presentDatePicker() async {
     final pickedDate = await showDatePicker(
       context: context,
@@ -71,7 +74,7 @@ class _TransactionFormState extends State<TransactionForm> {
     );
     if (pickedDate != null && pickedDate != _selectedDate) {
       setState(() {
-        // Set hanya tanggal tanpa waktu
+
         _selectedDate = DateTime(pickedDate.year, pickedDate.month, pickedDate.day);
       });
     }
@@ -89,6 +92,7 @@ class _TransactionFormState extends State<TransactionForm> {
           walletID: _walletId,
           userID: _userId
       );
+      print('New Transaction: $transaction');
       Provider.of<TransactionProvider>(context, listen: false).addTransaction(transaction);
       Navigator.pushReplacement(
         context,
@@ -107,45 +111,83 @@ class _TransactionFormState extends State<TransactionForm> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
-            TextFormField(
-              decoration: InputDecoration(labelText: 'Transaction Type'),
-              keyboardType: TextInputType.text,
+            DropdownButtonFormField<int>(
+              value: _transactionType,
+              onChanged: (value) {
+                setState(() {
+                  _transactionType = value!;
+                });
+              },
+              items: [
+                DropdownMenuItem<int>(
+                  value: 1,
+                  child: Text('Pengeluaran'),
+                ),
+                DropdownMenuItem<int>(
+                  value: 2,
+                  child: Text('Pemasukan'),
+                ),
+              ],
+              decoration: InputDecoration(
+                  labelText: 'Transaction Type',
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                    borderSide: BorderSide(color: Colors.grey, width: 0.0),
+                  ),
+                  border: OutlineInputBorder()
+
+              ),
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter transaction type';
+                if (value == null) {
+                  return 'Please select transaction type';
                 }
                 return null;
               },
-              onSaved: (value) {
+            ),
+            SizedBox(height: 24),
+            DropdownButtonFormField<int>(
+              value: _transactionCategory,
+              onChanged: (value) {
                 setState(() {
-                  _transactionType = int.parse(value!);
+                  _transactionCategory = value!;
                 });
               },
-            ),
-            SizedBox(height: 8),
-            TextFormField(
-              decoration: InputDecoration(labelText: 'Transaction Category'),
-              keyboardType: TextInputType.text,
+              items: categoryMap.entries.map((entry) {
+                return DropdownMenuItem<int>(
+                  value: entry.key,
+                  child: Text(entry.value),
+                );
+              }).toList(),
+              decoration: InputDecoration(
+                  labelText: 'Transaction Category',
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                    borderSide: BorderSide(color: Colors.grey, width: 0.0),
+                  ),
+                  border: OutlineInputBorder()
+              ),
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter transaction category';
+                if (value == null) {
+                  return 'Please select transaction category';
                 }
                 return null;
               },
-              onSaved: (value) {
-                setState(() {
-                  _transactionCategory = int.parse(value!);
-                });
-              },
             ),
-            SizedBox(height: 8),
+            SizedBox(height: 24),
             Row(
               children: [
                 Expanded(
                   child: TextFormField(
                     controller: _amountController,
                     keyboardType: TextInputType.number,
-                    decoration: InputDecoration(prefixText: '\Rp ', labelText: 'Amount'),
+                    decoration: InputDecoration(
+                        prefixText: '\Rp ', labelText: 'Amount',
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                          borderSide: BorderSide(color: Colors.grey, width: 0.0),
+                        ),
+                        border: OutlineInputBorder()
+                    ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter amount';
@@ -154,45 +196,85 @@ class _TransactionFormState extends State<TransactionForm> {
                     },
                   ),
                 ),
-                const SizedBox(width: 8),
+                // const SizedBox(width: 24),
                 Expanded(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.end,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Text(
-                        // Tampilkan hanya tanggal
-                        _selectedDate == null ? 'No date selected' : _selectedDate.toLocal().toString().split(' ')[0],
-                      ),
                       IconButton(
                         onPressed: _presentDatePicker,
-                        icon: Icon(Icons.calendar_month),
+                        icon: Icon(
+                          Icons.calendar_today,
+                          color: Theme.of(context).primaryColor,
+                        ),
                       ),
+                      Text(
+
+                        _selectedDate == null ? 'No date selected' : _selectedDate.toLocal().toString().split(' ')[0],
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.black87,
+                        ),
+                      ),
+
                     ],
                   ),
                 ),
+
+                const SizedBox(width: 64),
               ],
             ),
-            SizedBox(height: 8),
-            TextFormField(
-              controller: _walletController,
-              decoration: InputDecoration(labelText: 'Wallet ID'),
-              keyboardType: TextInputType.number,
+            SizedBox(height: 24),
+            DropdownButtonFormField<int>(
+              value: _walletId == 0 ? null : _walletId,
+              onChanged: (value) {
+                setState(() {
+                  _walletId = value!;
+                });
+              },
+              items: [
+                DropdownMenuItem<int>(
+                  value: 0,
+                  child: Text('<Pilih Wallet>'),
+                ),
+                ...Provider.of<WalletProvider>(context).wallets.map((wallet) {
+                  return DropdownMenuItem<int>(
+                    value: wallet.walletId,
+                    child: Text(wallet.walletName),
+                  );
+                }).toList(),
+              ],
+              decoration: InputDecoration(
+                labelText: 'Wallet',
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                    borderSide: BorderSide(color: Colors.grey, width: 0.0),
+                  ),
+                  border: OutlineInputBorder()
+                // contentPadding: EdgeInsets.symmetric(vertical: 16), // Atur jarak di sini
+              ),
+              style: TextStyle(fontSize: 16),
               validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter wallet ID';
+                if (value == null || value == 0) {
+                  return 'Please select a wallet';
                 }
                 return null;
               },
-              onSaved: (value) {
-                setState(() {
-                  _walletId = int.parse(value!);
-                });
-              },
             ),
-            SizedBox(height: 16),
+
+
+            SizedBox(height: 24),
             TextFormField(
-              decoration: InputDecoration(labelText: 'Description'),
+              decoration: InputDecoration(
+                  labelText: 'Description',
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                    borderSide: BorderSide(color: Colors.grey, width: 0.0),
+                  ),
+                  border: OutlineInputBorder()
+              ),
               keyboardType: TextInputType.text,
               validator: (value) {
                 if (value == null || value.isEmpty) {
@@ -210,7 +292,42 @@ class _TransactionFormState extends State<TransactionForm> {
             Center(
               child: ElevatedButton(
                 onPressed: () => _submitTransaction(context),
-                child: Text('Add Transaction'),
+
+                  style: ButtonStyle(
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        Colors.transparent),
+                    padding:
+                    MaterialStateProperty.all<EdgeInsetsGeometry>(
+                        EdgeInsets.zero),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  child: Ink(
+                      decoration: BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
+                          colors: [
+                            Color(0xFF6D55BD),
+                            Color(0xFFB700FF),
+                          ],
+                        ),
+                        borderRadius: BorderRadius.circular(50),
+                      ),
+                      child: Container(
+                        alignment: Alignment.center,
+                        width: 150,
+                        padding: EdgeInsets.all(12.0),
+                        child: Text(
+                          'Add Transaction',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      )
+                  )
+
               ),
             ),
           ],

@@ -23,17 +23,15 @@ class TransactionProvider with ChangeNotifier {
     _transactions = [];
     _selectedDate = DateTime.now();
     fetchTransactions();
-    getUserBalance(); // Memanggil getUserBalance() untuk menginisialisasi _userBalance
+    getUserBalance();
   }
 
-
-  // Metode untuk mengambil saldo pengguna
   Future<double> getUserBalance() async {
     try {
       return await _walletRepository.getUserBalance();
     } catch (e) {
       print('Error fetching balance: $e');
-      return 0; // Return default value if error occurs
+      return 0;
     }
   }
 
@@ -41,7 +39,7 @@ class TransactionProvider with ChangeNotifier {
     try {
       _userExpense = await getUserExpense();
       _userIncome = await getUserIncome();
-      _userBalance = await getUserBalance(); // Update userBalance
+      _userBalance = await getUserBalance();
       _transactions = await _transactionRepository.getAllTransactions();
       notifyListeners();
     } catch (e) {
@@ -49,7 +47,6 @@ class TransactionProvider with ChangeNotifier {
     }
   }
 
-  // Metode lainnya...
 
   Future<double> getUserExpense() async {
     double totalExpense = 0;
@@ -66,7 +63,7 @@ class TransactionProvider with ChangeNotifier {
     double totalIncome = 0;
     try {
       final List<TransactionModel> transactions = await _transactionRepository.getAllTransactions();
-      // Hitung total pemasukan berdasarkan transaksi dengan tipe 2 (pemasukan)
+
       totalIncome = transactions.where((transaction) => transaction.transactionType == 2).fold(0, (prev, transaction) => prev + transaction.amount!);
     } catch (e) {
       print('Error calculating user income: $e');
@@ -102,9 +99,9 @@ class TransactionProvider with ChangeNotifier {
   }
 
   void clear() {
-    _transactions.clear(); // Menghapus semua transaksi
-    _selectedDate = DateTime.now(); // Mengatur tanggal terpilih ke tanggal sekarang
-    notifyListeners(); // Memberi tahu listener bahwa ada perubahan
+    _transactions.clear();
+    _selectedDate = DateTime.now();
+    notifyListeners();
   }
 
   void setSelectedDate(DateTime newDate) {

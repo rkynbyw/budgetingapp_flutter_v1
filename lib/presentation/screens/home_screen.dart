@@ -11,6 +11,10 @@ import '../provider/budget_provider.dart';
 import '../provider/transaction_provider.dart';
 
 class HomeScreen extends StatefulWidget {
+  final int? initialIndex;
+
+  HomeScreen({Key? key, this.initialIndex}) : super(key: key);
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
@@ -25,6 +29,8 @@ class _HomeScreenState extends State<HomeScreen> {
     _loadUsername();
     Provider.of<TransactionProvider>(context, listen: false).fetchTransactions();
     Provider.of<BudgetProvider>(context, listen: false).fetchBudgets();
+
+    _selectedIndex = widget.initialIndex ?? 0;
   }
 
   static List<Widget> _widgetOptions = <Widget>[
@@ -50,45 +56,45 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-          title: Text('Home Page Hmm - $_username'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.logout),
-
-            onPressed: () async {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text('Logout'),
-                    content: Text('Are you sure you want to logout?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () async {
-                          SharedPreferences prefs = await SharedPreferences.getInstance();
-                          await prefs.clear();
-                          Provider.of<TransactionProvider>(context, listen: false).clear();
-                          Provider.of<BudgetProvider>(context, listen: false).clear();
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (context) => LoginPage()),
-                          );
-                        },
-                        child: Text('Logout'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          ),
-        ],
-      ),
+      appBar: _selectedIndex != 3 ? AppBar(
+        title: Text('Hello, $_username',
+        ),
+        // actions: [
+        //   IconButton(
+        //     icon: Icon(Icons.logout),
+        //     onPressed: () async {
+        //       showDialog(
+        //         context: context,
+        //         builder: (BuildContext context) {
+        //           return AlertDialog(
+        //             title: Text('Logout'),
+        //             content: Text('Are you sure you want to logout?'),
+        //             actions: [
+        //               TextButton(
+        //                 onPressed: () => Navigator.pop(context),
+        //                 child: Text('Cancel'),
+        //               ),
+        //               TextButton(
+        //                 onPressed: () async {
+        //                   SharedPreferences prefs = await SharedPreferences.getInstance();
+        //                   await prefs.clear();
+        //                   Provider.of<TransactionProvider>(context, listen: false).clear();
+        //                   Provider.of<BudgetProvider>(context, listen: false).clear();
+        //                   Navigator.pushReplacement(
+        //                     context,
+        //                     MaterialPageRoute(builder: (context) => LoginPage()),
+        //                   );
+        //                 },
+        //                 child: Text('Logout'),
+        //               ),
+        //             ],
+        //           );
+        //         },
+        //       );
+        //     },
+        //   ),
+        // ],
+      ) : null,
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomNavigationBar(
         items: <BottomNavigationBarItem>[
@@ -115,5 +121,6 @@ class _HomeScreenState extends State<HomeScreen> {
         onTap: _onItemTapped,
       ),
     );
+
   }
 }

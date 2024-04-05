@@ -15,4 +15,12 @@ class LoginRepository {
       throw Exception('Failed to login (repo): $e');
     }
   }
+
+  Future<void> register(String email, String username, String fullName, String password) async {
+    await _dataSource.register(email, username, fullName, password);
+  }
+
+
+
+
 }

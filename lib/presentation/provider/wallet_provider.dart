@@ -15,7 +15,8 @@ class WalletProvider with ChangeNotifier {
 
   Future<void> fetchWallets() async {
     try {
-      _wallets = await _walletRepository.getUserWallet();
+      List<WalletModel> fetchedWallets = await _walletRepository.getUserWallet();
+      _wallets = fetchedWallets;
       notifyListeners();
     } catch (e) {
       print('Error fetching wallets: $e');

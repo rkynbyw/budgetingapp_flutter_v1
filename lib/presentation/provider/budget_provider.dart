@@ -2,8 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:budgeting_flutter_app_v1/data/models/budget_model.dart';
 import 'package:budgeting_flutter_app_v1/data/repositories/budget_repository.dart';
 
+import '../../data/repositories/transaction_repository.dart';
+
 class BudgetProvider with ChangeNotifier {
   final BudgetRepository _budgetRepository = BudgetRepository();
+  final TransactionRepository _transactionRepository = TransactionRepository();
   late List<BudgetModel> _budgets;
 
   List<BudgetModel> get budgets => _budgets;
@@ -26,12 +29,23 @@ class BudgetProvider with ChangeNotifier {
   Future<void> fetchBudgets() async {
     try {
       _budgets = await _budgetRepository.getUserBudgets();
+      for (var budget in _budgets) {
+        double expense = await _transactionRepository.getExpenseForMonth(
+          budget.monthDate!.year,
+          budget.monthDate!.month,
+          budget.transactionCategoryID!,
+        );
+        budget.expense = expense;
+        budget.remainingAmount = (budget.amount ?? 0) - (expense ?? 0);
+        // print(budget.expense);
+        // print(budget.remainingAmount);
+
+      }
       notifyListeners();
     } catch (e) {
       if (e.toString().contains('Unauthorized')) {
         _budgets.clear();
         notifyListeners();
-        // Menyimpan pesan error
         _errorMessage = 'Please upgrade your subscription to access budgeting feature';
         notifyListeners();
       } else {
